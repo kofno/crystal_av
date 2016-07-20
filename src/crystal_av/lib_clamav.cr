@@ -3,6 +3,8 @@ module CrystalAV
   @[Link("libclamav")]
   lib LibClamAV
 
+    CL_SUCCESS = 0
+
     ### results
     CL_CLEAN = 0
     CL_VIRUS = 1
@@ -78,6 +80,7 @@ module CrystalAV
       engine : Engine*,
       options : UInt32
     ) : Int32
+    fun cl_strerror(errcode : Int32) : UInt8*
 
   end
 end
