@@ -33,7 +33,21 @@ installs (or updates) the ClamAV database.
 require "crystal_av"
 ```
 
-From here, you can use the low level bindings directly.
+You can scan a file (or many files) using the Engine class.
+
+```crystal
+CrystalAV::Engine.load do |engine|
+  infected_file = File.expand_path(
+    "./fixtures/virus.txt",
+    File.dirname(__FILE__)
+  )
+  results = engine.scan(infected_file)
+  puts results.virus?     #=> true
+  puts results.virname    #=> Eicar-Test-Signature
+end
+```
+
+Or you can use the low level bindings directly.
 
 ```crystal
 

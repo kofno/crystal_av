@@ -67,7 +67,7 @@ module CrystalAV
 
     fun cl_init(options : UInt32) : Int32
     fun cl_engine_new : Pointer(Engine)
-    fun cl_engine_free(engine : Pointer(Engine)) : Void
+    fun cl_engine_free(engine : Pointer(Engine)) : Int32
     fun cl_retdbdir : UInt8*  # C String
     fun cl_load(
       path : UInt8*, engine : Engine*, signo : Int32*, options : UInt32

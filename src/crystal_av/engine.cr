@@ -6,9 +6,12 @@ module CrystalAV
   # is expensive (6 seconds on this machine).
   #
   # Calling Engine.run ensures that the AV Engine resources are freed when
-  # virus scanning operations are completed. 
+  # virus scanning operations are completed.
   #
   class Engine
+
+    extend CHandler
+    include CHandler
 
     def self.run
       engine = self.new
@@ -20,14 +23,35 @@ module CrystalAV
       end
     end
 
-    def initialize
-      LibClamAV.cl_init(0)
-      @engine = LibClamAV.cl_engine_new
+    def self.load
+      c_err_handler { LibClamAV.cl_init(0) }
+      engine = c_nil_handler("Failed to allocate engine") {
+        LibClamAV.cl_engine_new
+      }
+      c_err_handler { load_db_files(engine) }
+      c_err_handler { compile_db(engine) }
+      new(engine)
     end
 
-    def load
-      cl_load
-      cl_compile
+    def self.load
+      engine = load
+      yield engine ensure engine.close
+    end
+
+    private def self.load_db_files(engine)
+      dbpath = LibClamAV.cl_retdbdir
+      signo = 0
+      signo_ptr = pointerof(signo)
+
+      LibClamAV.cl_load(dbpath, engine, signo_ptr, LibClamAV::CL_DB_STDOPT)
+    end
+
+    private def self.compile_db(engine)
+      LibClamAV.cl_engine_compile(engine)
+    end
+
+    private def initialize(engine : Pointer(LibClamAV::Engine))
+      @engine = engine
     end
 
     def scan(filename)
@@ -38,25 +62,13 @@ module CrystalAV
         @engine,
         LibClamAV::CL_SCAN_STDOPT
       )
-      ScanResult.new(result, String.new(virname), filename)
+
+      virus_name = virname.null? ? "" : String.new(virname)
+      ScanResult.new(result, virus_name, filename)
     end
 
     def close
-      LibClamAV.cl_engine_free(@engine)
-    end
-
-    ### Private methods
-
-    private def cl_load
-      dbpath = LibClamAV.cl_retdbdir
-      signo = 0
-      signo_ptr = pointerof(signo)
-
-      LibClamAV.cl_load(dbpath, @engine, signo_ptr, LibClamAV::CL_DB_STDOPT)
-    end
-
-    private def cl_compile
-      LibClamAV.cl_engine_compile(@engine)
+      c_err_handler { LibClamAV.cl_engine_free(@engine) }
     end
 
   end
