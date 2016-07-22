@@ -63,8 +63,7 @@ module CrystalAV
         LibClamAV::CL_SCAN_STDOPT
       )
 
-      virus_name = virname.null? ? "" : String.new(virname)
-      ScanResult.new(result, virus_name, filename)
+      ScanResult.new(result, virname, filename)
     end
 
     def close

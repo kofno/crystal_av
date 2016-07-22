@@ -2,11 +2,11 @@ module CrystalAV
 
   class ScanResult
 
-    getter :virname
     getter :filename
     private getter :result
+    private getter :virname
 
-    def initialize(result : Int32, virname : String, filename : String)
+    def initialize(result : Int32, virname : UInt8*, filename : String)
       @result = result
       @virname = virname
       @filename = filename
@@ -14,6 +14,10 @@ module CrystalAV
 
     def virus?
       @result == LibClamAV::CL_VIRUS
+    end
+
+    def virus_name
+      virus? ? String.new(virname) : ""
     end
 
     def clean?
