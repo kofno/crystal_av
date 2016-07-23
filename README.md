@@ -42,8 +42,8 @@ CrystalAV::Engine.load do |engine|
     File.dirname(__FILE__)
   )
   results = engine.scan(infected_file)
-  puts results.virus?     #=> true
-  puts results.virname    #=> Eicar-Test-Signature
+  puts results.virus?        #=> true
+  puts results.virus_name    #=> Eicar-Test-Signature
 end
 ```
 
